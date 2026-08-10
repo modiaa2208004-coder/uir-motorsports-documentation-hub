@@ -3,6 +3,34 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 runtime_root="${SITES_RUNTIME_ROOT:-${project_root}/.sites-runtime}"
+user_home="${HOME:-}"
+
+# better-sqlite3 is a native Node addon. Keep all project commands on the
+# Node 22 ABI declared by .nvmrc, even when the user's shell currently points
+# at another installed Node version.
+node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || true)"
+shopt -s nullglob
+node22_candidates=(
+  "${SITES_NODE22_BIN:-}"
+  "/opt/homebrew/opt/node@22/bin"
+  "/usr/local/opt/node@22/bin"
+  "${user_home}"/.nvm/versions/node/v22.*/bin
+)
+shopt -u nullglob
+if [[ "${node_major}" != "22" ]]; then
+  for node_bin in "${node22_candidates[@]}"; do
+    if [[ -x "${node_bin}/node" ]]; then
+      export PATH="${node_bin}:${PATH}"
+      node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || true)"
+      break
+    fi
+  done
+fi
+
+if [[ "${node_major}" != "22" ]]; then
+  echo "This project requires Node.js 22.x for better-sqlite3. Run 'nvm use' or set SITES_NODE22_BIN to a Node 22 bin directory." >&2
+  exit 1
+fi
 
 mkdir -p \
   "${runtime_root}/home" \

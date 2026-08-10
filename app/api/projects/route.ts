@@ -1,5 +1,8 @@
 import { asc } from "drizzle-orm";
 import { projects } from "../../../db/schema";
+import { requireApiUser, requireEditor } from "../../auth";
+
+export const runtime = "nodejs";
 
 async function database() {
   const { getDb } = await import("../../../db");
@@ -22,6 +25,8 @@ const defaultProject = {
 
 export async function GET() {
   try {
+    const auth = await requireApiUser();
+    if (auth instanceof Response) return auth;
     const db = await database();
     let rows = await db.select().from(projects).orderBy(asc(projects.createdAt));
 
@@ -41,6 +46,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireApiUser();
+    if (auth instanceof Response) return auth;
+    const denied = requireEditor(auth);
+    if (denied) return denied;
     const payload = (await request.json()) as Partial<typeof defaultProject>;
     const name = payload.name?.trim() ?? "";
     const season = payload.season?.trim() ?? "";

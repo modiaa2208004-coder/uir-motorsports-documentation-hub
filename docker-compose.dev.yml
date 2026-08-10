@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      SQLITE_DB_PATH: /app/.sites-runtime/data/app.sqlite
+      LOCAL_EVIDENCE_DIR: /app/.sites-runtime/evidence
+    volumes:
+      - .:/app
+      - dev-node-modules:/app/node_modules
+      - dev-runtime:/app/.sites-runtime
+    command: npm run dev -- --webpack
+
+volumes:
+  dev-node-modules:
+  dev-runtime:

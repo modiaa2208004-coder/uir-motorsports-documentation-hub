@@ -1,5 +1,3 @@
 {
-  "d1": "DB",
-  "project_id": "appgprj_6a6b40cf74e88191929c34ba93acf98f",
-  "r2": "BUCKET"
+  // This file is deprecated for Azure deployment. Use .env.local for API settings instead.
 }

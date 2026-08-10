@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      SQLITE_DB_PATH: /app/data/app.sqlite
+      LOCAL_EVIDENCE_DIR: /app/data/evidence
+    volumes:
+      - app-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  app-data:

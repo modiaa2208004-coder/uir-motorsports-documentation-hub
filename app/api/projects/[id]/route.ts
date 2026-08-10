@@ -1,5 +1,8 @@
 import { eq, sql } from "drizzle-orm";
 import { projects } from "../../../../db/schema";
+import { requireApiUser, requireEditor } from "../../../auth";
+
+export const runtime = "nodejs";
 
 async function database() {
   const { getDb } = await import("../../../../db");
@@ -11,6 +14,10 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+  const auth = await requireApiUser();
+  if (auth instanceof Response) return auth;
+  const denied = requireEditor(auth);
+  if (denied) return denied;
     const { id } = await context.params;
     const payload = (await request.json()) as {
       name?: string;
